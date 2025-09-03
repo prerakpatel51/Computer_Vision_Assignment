@@ -1,5 +1,4 @@
 # app_gradio.py - Gradio web interface for camera calibration
-# Safe implementation: single-output functions, no DownloadButton
 
 import os, glob, shutil  # File operations and directory management
 import numpy as np       # Numerical operations for arrays
