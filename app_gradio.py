@@ -11,8 +11,34 @@ from calibration_utils import IO, Calib, Overlay, Render, Img
 IS_COLAB = os.path.exists("/content")  # Check if running in Google Colab
 BASE_DIR = "/content" if IS_COLAB else os.getcwd()  # Use /content in Colab, current dir elsewhere
 IMG_DIR = os.path.join(BASE_DIR, "images")  # Directory for calibration images
+SAMPLES_DIR = os.path.join(BASE_DIR, "samples")  # Directory for sample images
 OUT_JSON = os.path.join(BASE_DIR, "calibration.json")  # Output file for calibration results
 IO.ensure_dir(IMG_DIR)  # Create images directory if it doesn't exist
+
+def load_sample_images():
+    """Load sample images from samples/ folder to images/ folder on startup"""
+    if not os.path.exists(SAMPLES_DIR):
+        return "No samples/ folder found. Upload your own images to get started."
+    
+    # Get sample images
+    sample_files = IO.list_images(SAMPLES_DIR)
+    if not sample_files:
+        return "No sample images found in samples/ folder. Upload your own images to get started."
+    
+    # Clear existing images from the directory
+    for f in glob.glob(os.path.join(IMG_DIR, "*")):
+        try: os.remove(f)
+        except: pass
+    
+    # Copy sample images to images directory
+    saved = 0
+    for i, src in enumerate(sample_files):
+        if os.path.exists(src):
+            base = os.path.splitext(os.path.basename(src))[0] + ".jpg"
+            shutil.copy(src, os.path.join(IMG_DIR, f"sample_{i:03d}_{base}"))
+            saved += 1
+    
+    return f"✅ Loaded {saved} sample image(s) from samples/ folder. You can now run calibration or upload different images."
 
 def save_uploads(files):
     """Save uploaded files to images directory, clearing existing files first"""
@@ -191,10 +217,11 @@ def create_interface():
         # File upload section
         with gr.Row():
             # Multi-file uploader restricted to image types, returns file paths
-            uploader = gr.Files(label="Upload .jpg/.jpeg/.png images", file_types=["image"], type="filepath")
+            uploader = gr.Files(label="Upload .jpg/.jpeg/.png images (optional - samples auto-loaded)", file_types=["image"], type="filepath")
             upload_btn = gr.Button("Save to images/")  # Button to process uploaded files
-        # Non-editable text box to show upload status messages
-        upload_msg = gr.Textbox(label="Upload Log", interactive=False)
+            samples_btn = gr.Button("Load Sample Images", variant="secondary")  # Button to load samples
+        # Non-editable text box to show upload status messages  
+        upload_msg = gr.Textbox(label="Upload Log", interactive=False, value=load_sample_images())
 
         # Collapsible section for calibration parameters (starts expanded)
         with gr.Accordion("Calibration Parameters", open=True):
@@ -236,6 +263,7 @@ def create_interface():
 
         # Connect UI components to their corresponding functions
         upload_btn.click(save_uploads, inputs=[uploader], outputs=[upload_msg])
+        samples_btn.click(load_sample_images, outputs=[upload_msg])
         test_btn.click(test_detection, inputs=[cols, rows], outputs=[calib_out])
         run_btn.click(run_calibration, inputs=[cols, rows, sq], outputs=[calib_out])
         viz_btn.click(show_poses_and_overlays,
