@@ -11,7 +11,10 @@ from calibration_utils import IO, Calib, Overlay, Render, Img
 IS_COLAB = os.path.exists("/content")  # Check if running in Google Colab
 BASE_DIR = "/content" if IS_COLAB else os.getcwd()  # Use /content in Colab, current dir elsewhere
 IMG_DIR = os.path.join(BASE_DIR, "images")  # Directory for calibration images
-SAMPLES_DIR = os.path.join(BASE_DIR, "samples")  # Directory for sample images
+
+# For samples, check both current directory and base directory
+SAMPLES_DIR = os.path.join(os.getcwd(), "samples") if os.path.exists(os.path.join(os.getcwd(), "samples")) else os.path.join(BASE_DIR, "samples")
+
 OUT_JSON = os.path.join(BASE_DIR, "calibration.json")  # Output file for calibration results
 IO.ensure_dir(IMG_DIR)  # Create images directory if it doesn't exist
 
