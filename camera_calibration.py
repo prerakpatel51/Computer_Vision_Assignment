@@ -65,8 +65,16 @@ def run_calibration_pipeline():
     
     # Step 6: Launch Gradio Interface
     try:
-        from app_gradio import create_interface
+        # Force reload modules in case they're cached (important for Colab)
+        import importlib
+        if 'app_gradio' in sys.modules:
+            importlib.reload(sys.modules['app_gradio'])
+        
+        from app_gradio import create_interface, load_default_samples
         demo = create_interface()
+        
+        # Test that the load_default_samples function exists
+        print("✅ Load default samples function available:", hasattr(load_default_samples, '__call__'))
         
         print("🚀 Launching Gradio interface...")
         if IN_COLAB:
