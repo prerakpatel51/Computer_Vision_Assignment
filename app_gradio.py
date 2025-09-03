@@ -224,7 +224,7 @@ def create_interface():
             upload_btn = gr.Button("Save to images/")  # Button to process uploaded files
             samples_btn = gr.Button("Load Sample Images", variant="secondary")  # Button to load samples
         # Non-editable text box to show upload status messages  
-        upload_msg = gr.Textbox(label="Upload Log", interactive=False, value=load_sample_images())
+        upload_msg = gr.Textbox(label="Upload Log", interactive=False)
 
         # Collapsible section for calibration parameters (starts expanded)
         with gr.Accordion("Calibration Parameters", open=True):
@@ -272,6 +272,10 @@ def create_interface():
         viz_btn.click(show_poses_and_overlays,
                       inputs=[max_ov, use_plotly, axis_scale, draw_corners, anchor],
                       outputs=[pose_plot, gallery, und_img])
+        
+        # Auto-load sample images when interface starts
+        demo.load(load_sample_images, outputs=[upload_msg])
+        
     return demo  # Return the configured Gradio interface
 
 # Entry point when script is run directly (not imported)
