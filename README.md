@@ -40,8 +40,22 @@ python app_gradio.py
   - `extrinsics` (R,t) per image,
   - `valid_paths` for reproducibility.
 
+## ⚡ Quick Start (One Command)
+```bash
+# Clone and run in one go:
+git clone https://github.com/prerakpatel51/Computer_Vision_Assignment.git
+cd Computer_Vision_Assignment/
+python -c "from camera_calibration import run_calibration_pipeline; run_calibration_pipeline()"
+```
+
+Or step by step:
+```bash
+git clone https://github.com/prerakpatel51/Computer_Vision_Assignment.git
+cd Computer_Vision_Assignment/
+python camera_calibration.py
+```
+
 ## 🧠 Notes
 - Use sharp, well‑lit images and vary distance/tilt/roll.
 - Pattern size is **inner corners** (squares minus one).
 - If results look off, drop outlier views (highest per‑view error) and recalibrate.
-# Computer_Vision_Assignment
