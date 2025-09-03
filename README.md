@@ -5,9 +5,9 @@ This project calibrates your camera from chessboard images and provides an **inl
 ## 📦 Files
 - `calibration_utils.py` – core, stateless helpers (IO, Board, Img, Calib, Overlay, Render).
 - `app_gradio.py` – Gradio interface using the helpers.
-- `Camera_Calibration.ipynb` – Notebook (Colab/local) that launches the UI inline.
+- `camera_calibration.ipynb` – Notebook (Colab/local) that launches the UI inline.
 - `requirements.txt` – Python dependencies.
-- `ai_tools_appendix_template.md` – Template for your AI usage appendix.
+- `Ai&tools_appendix.pdf` – Template for your AI usage appendix.
 
 ## 🚀 Colab / Notebook Usage
 1. Open `Camera_Calibration.ipynb` in Google Colab.
