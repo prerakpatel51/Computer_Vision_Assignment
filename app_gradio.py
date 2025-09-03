@@ -20,13 +20,35 @@ IO.ensure_dir(IMG_DIR)  # Create images directory if it doesn't exist
 
 def load_sample_images():
     """Load sample images from samples/ folder to images/ folder on startup"""
-    if not os.path.exists(SAMPLES_DIR):
-        return "No samples/ folder found. Upload your own images to get started."
+    # Debug: Show current paths
+    current_dir = os.getcwd()
+    debug_info = f"Current dir: {current_dir}, Looking for samples at: {SAMPLES_DIR}"
+    
+    # Try multiple possible locations for samples folder
+    possible_samples_dirs = [
+        os.path.join(current_dir, "samples"),
+        os.path.join(BASE_DIR, "samples"),
+        SAMPLES_DIR
+    ]
+    
+    found_samples_dir = None
+    for samples_dir in possible_samples_dirs:
+        if os.path.exists(samples_dir):
+            found_samples_dir = samples_dir
+            break
+    
+    if not found_samples_dir:
+        # List what's actually in the current directory for debugging
+        try:
+            contents = os.listdir(current_dir)
+            return f"No samples/ folder found. {debug_info}\nCurrent directory contents: {contents[:10]}..."
+        except:
+            return f"No samples/ folder found. {debug_info}"
     
     # Get sample images
-    sample_files = IO.list_images(SAMPLES_DIR)
+    sample_files = IO.list_images(found_samples_dir)
     if not sample_files:
-        return "No sample images found in samples/ folder. Upload your own images to get started."
+        return f"No sample images found in samples/ folder at {found_samples_dir}. Upload your own images to get started."
     
     # Clear existing images from the directory
     for f in glob.glob(os.path.join(IMG_DIR, "*")):
@@ -41,7 +63,7 @@ def load_sample_images():
             shutil.copy(src, os.path.join(IMG_DIR, f"sample_{i:03d}_{base}"))
             saved += 1
     
-    return f"✅ Loaded {saved} sample image(s) from samples/ folder. You can now run calibration or upload different images."
+    return f"✅ Loaded {saved} sample image(s) from {found_samples_dir}. You can now run calibration or upload different images."
 
 def save_uploads(files):
     """Save uploaded files to images directory, clearing existing files first"""
