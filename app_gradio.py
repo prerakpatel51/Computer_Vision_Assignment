@@ -11,59 +11,49 @@ from calibration_utils import IO, Calib, Overlay, Render, Img
 IS_COLAB = os.path.exists("/content")  # Check if running in Google Colab
 BASE_DIR = "/content" if IS_COLAB else os.getcwd()  # Use /content in Colab, current dir elsewhere
 IMG_DIR = os.path.join(BASE_DIR, "images")  # Directory for calibration images
-
-# For samples, check both current directory and base directory
-SAMPLES_DIR = os.path.join(os.getcwd(), "samples") if os.path.exists(os.path.join(os.getcwd(), "samples")) else os.path.join(BASE_DIR, "samples")
-
 OUT_JSON = os.path.join(BASE_DIR, "calibration.json")  # Output file for calibration results
 IO.ensure_dir(IMG_DIR)  # Create images directory if it doesn't exist
 
-def load_sample_images():
-    """Load sample images from samples/ folder to images/ folder on startup"""
-    # Debug: Show current paths
+def load_default_samples():
+    """Load default sample images from samples/ folder when user clicks the button"""
+    # Try to find samples folder in current working directory first (where repo is cloned)
     current_dir = os.getcwd()
-    debug_info = f"Current dir: {current_dir}, Looking for samples at: {SAMPLES_DIR}"
+    samples_dir = os.path.join(current_dir, "samples")
     
-    # Try multiple possible locations for samples folder
-    possible_samples_dirs = [
-        os.path.join(current_dir, "samples"),
-        os.path.join(BASE_DIR, "samples"),
-        SAMPLES_DIR
-    ]
+    # If not found, try relative to script location
+    if not os.path.exists(samples_dir):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        samples_dir = os.path.join(script_dir, "samples")
     
-    found_samples_dir = None
-    for samples_dir in possible_samples_dirs:
-        if os.path.exists(samples_dir):
-            found_samples_dir = samples_dir
-            break
-    
-    if not found_samples_dir:
-        # List what's actually in the current directory for debugging
-        try:
-            contents = os.listdir(current_dir)
-            return f"No samples/ folder found. {debug_info}\nCurrent directory contents: {contents[:10]}..."
-        except:
-            return f"No samples/ folder found. {debug_info}"
+    # If still not found, give clear instructions
+    if not os.path.exists(samples_dir):
+        return (f"❌ No samples/ folder found.\n"
+                f"Current directory: {current_dir}\n"
+                f"Please ensure you have a 'samples/' folder with chessboard images, "
+                f"or upload your own images manually.")
     
     # Get sample images
-    sample_files = IO.list_images(found_samples_dir)
+    sample_files = IO.list_images(samples_dir)
     if not sample_files:
-        return f"No sample images found in samples/ folder at {found_samples_dir}. Upload your own images to get started."
+        return f"❌ No image files found in {samples_dir}. Please add chessboard images to the samples folder."
     
-    # Clear existing images from the directory
+    # Clear existing images from the target directory
     for f in glob.glob(os.path.join(IMG_DIR, "*")):
-        try: os.remove(f)
-        except: pass
+        try: 
+            os.remove(f)
+        except: 
+            pass
     
     # Copy sample images to images directory
     saved = 0
     for i, src in enumerate(sample_files):
         if os.path.exists(src):
             base = os.path.splitext(os.path.basename(src))[0] + ".jpg"
-            shutil.copy(src, os.path.join(IMG_DIR, f"sample_{i:03d}_{base}"))
+            dest_path = os.path.join(IMG_DIR, f"sample_{i:03d}_{base}")
+            shutil.copy(src, dest_path)
             saved += 1
     
-    return f"✅ Loaded {saved} sample image(s) from {found_samples_dir}. You can now run calibration or upload different images."
+    return f"✅ Loaded {saved} default sample image(s) from samples/ folder. Ready for calibration!"
 
 def save_uploads(files):
     """Save uploaded files to images directory, clearing existing files first"""
@@ -242,11 +232,11 @@ def create_interface():
         # File upload section
         with gr.Row():
             # Multi-file uploader restricted to image types, returns file paths
-            uploader = gr.Files(label="Upload .jpg/.jpeg/.png images (optional - samples auto-loaded)", file_types=["image"], type="filepath")
-            upload_btn = gr.Button("Save to images/")  # Button to process uploaded files
-            samples_btn = gr.Button("Load Sample Images", variant="secondary")  # Button to load samples
+            uploader = gr.Files(label="Upload your own .jpg/.jpeg/.png images", file_types=["image"], type="filepath")
+            upload_btn = gr.Button("Use Uploaded Images")  # Button to process uploaded files
+            samples_btn = gr.Button("Load Default Samples", variant="primary")  # Button to load samples
         # Non-editable text box to show upload status messages  
-        upload_msg = gr.Textbox(label="Upload Log", interactive=False)
+        upload_msg = gr.Textbox(label="Image Status", interactive=False, placeholder="Click 'Load Default Samples' to use provided sample images, or upload your own.")
 
         # Collapsible section for calibration parameters (starts expanded)
         with gr.Accordion("Calibration Parameters", open=True):
@@ -288,15 +278,12 @@ def create_interface():
 
         # Connect UI components to their corresponding functions
         upload_btn.click(save_uploads, inputs=[uploader], outputs=[upload_msg])
-        samples_btn.click(load_sample_images, outputs=[upload_msg])
+        samples_btn.click(load_default_samples, outputs=[upload_msg])
         test_btn.click(test_detection, inputs=[cols, rows], outputs=[calib_out])
         run_btn.click(run_calibration, inputs=[cols, rows, sq], outputs=[calib_out])
         viz_btn.click(show_poses_and_overlays,
                       inputs=[max_ov, use_plotly, axis_scale, draw_corners, anchor],
                       outputs=[pose_plot, gallery, und_img])
-        
-        # Auto-load sample images when interface starts
-        demo.load(load_sample_images, outputs=[upload_msg])
         
     return demo  # Return the configured Gradio interface
 
