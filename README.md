@@ -23,7 +23,33 @@ This project calibrates your camera from chessboard images and provides an **inl
 
 > Chessboard: https://docs.opencv.org/4.x/pattern.png
 
-## 🧪 Local (Desktop) Usage
+## 🚀 Google Colab Usage
+```bash
+!git clone https://github.com/prerakpatel51/Computer_Vision_Assignment.git
+%cd Computer_Vision_Assignment/
+from camera_calibration import run_calibration_pipeline
+run_calibration_pipeline()
+```
+
+## 📓 Jupyter Notebook (Local) Usage
+```bash
+!git clone https://github.com/prerakpatel51/Computer_Vision_Assignment.git
+%cd Computer_Vision_Assignment/
+from camera_calibration import run_calibration_pipeline
+run_calibration_pipeline()
+```
+
+## 🧪 Local (Desktop/Terminal) Usage
+
+**Option 1: Using the consolidated script (recommended)**
+```bash
+git clone https://github.com/prerakpatel51/Computer_Vision_Assignment.git
+cd Computer_Vision_Assignment/
+python camera_calibration.py
+# This will auto-install dependencies and launch the Gradio interface
+```
+
+**Option 2: Manual setup**
 ```bash
 python -m venv .venv
 source .venv/bin/activate   # on Windows: .venv\Scripts\activate
@@ -39,21 +65,6 @@ python app_gradio.py
   - `num_views`, `per_view_errors`,
   - `extrinsics` (R,t) per image,
   - `valid_paths` for reproducibility.
-
-## ⚡ Quick Start (One Command)
-```bash
-# Clone and run in one go:
-git clone https://github.com/prerakpatel51/Computer_Vision_Assignment.git
-cd Computer_Vision_Assignment/
-python -c "from camera_calibration import run_calibration_pipeline; run_calibration_pipeline()"
-```
-
-Or step by step:
-```bash
-git clone https://github.com/prerakpatel51/Computer_Vision_Assignment.git
-cd Computer_Vision_Assignment/
-python camera_calibration.py
-```
 
 ## 🧠 Notes
 - Use sharp, well‑lit images and vary distance/tilt/roll.
