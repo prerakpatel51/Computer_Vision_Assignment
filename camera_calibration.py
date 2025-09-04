@@ -21,17 +21,8 @@ def run_calibration_pipeline():
     IN_JUPYTER = 'ipykernel' in sys.modules and not IN_COLAB
     print(f"Environment: {'Google Colab' if IN_COLAB else 'Jupyter Notebook' if IN_JUPYTER else 'Script/Terminal'}")
     
-    # Step 2: Handle Google Colab setup if needed
-    if IN_COLAB:
-        try:
-            from google.colab import drive
-            drive.mount('/content/drive')
-            os.chdir('/content/drive/MyDrive/Colab Notebooks/pinhole')
-            print("Google Drive mounted and directory changed")
-        except Exception as e:
-            print(f"⚠️ Colab setup failed: {e}")
-    else:
-        print(f"Working directory: {os.getcwd()}")
+    # Step 2: Stay in current directory (don't change to Google Drive)
+    print(f"Working directory: {os.getcwd()}")
     
     # Step 3: Install Dependencies
     print("📦 Installing dependencies...")
@@ -65,16 +56,8 @@ def run_calibration_pipeline():
     
     # Step 6: Launch Gradio Interface
     try:
-        # Force reload modules in case they're cached (important for Colab)
-        import importlib
-        if 'app_gradio' in sys.modules:
-            importlib.reload(sys.modules['app_gradio'])
-        
-        from app_gradio import create_interface, load_default_samples
+        from app_gradio import create_interface
         demo = create_interface()
-        
-        # Test that the load_default_samples function exists
-        print("✅ Load default samples function available:", hasattr(load_default_samples, '__call__'))
         
         print("🚀 Launching Gradio interface...")
         if IN_COLAB:
